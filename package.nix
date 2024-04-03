@@ -10,8 +10,8 @@
 , python3
 }:
 let
-  version = "";
-  packageName = self.packageName;
+  version = "9999";
+  packageName = "naiveproxy";
   # Make chromium library functions use the correct version
   mkChromiumDerivation = (chromium.override (previous: {
     upstream-info = chromium.upstream-info // { inherit version; };
@@ -192,8 +192,10 @@ let
       ignoredPatches = [
         "widevine-79.patch"
         "angle-wayland-include-protocol.patch"
+        "chromium-initial-prefs.patch"
         # qr code generator
-        "https://github.com/chromium/chromium/commit/bcf739b95713071687ff25010683248de0092f6a.patch"
+        "https://github.com/chromium/chromium/commit/b9bef8e9555645fc91fab705bec697214a39dbc1.patch"
+        "https://github.com/chromium/chromium/commit/fc09363b2278893790d131c72a4ed96ec9837624.patch"
       ];
       # From common.nix of nixpkgs
       patches = builtins.filter
