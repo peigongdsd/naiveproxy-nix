@@ -1,0 +1,3 @@
+[submodule "naiveproxy-src"]
+	path = naiveproxy-src
+	url = https://github.com/klzgrad/naiveproxy
