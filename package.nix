@@ -1,5 +1,5 @@
 # This package is written by @KiruyaMomochi.
-{ src
+{ naiveSrc
 , chromium
 , lib
 , stdenv
@@ -11,7 +11,6 @@
 }:
 let
   version = "";
-  naiveSrc = src;  
   packageName = self.packageName;
   # Make chromium library functions use the correct version
   mkChromiumDerivation = (chromium.override (previous: {
@@ -163,7 +162,7 @@ let
       pname = "naiveproxy";
       packageName = "naiveproxy";
       buildTargets = [ "naive" ];
-      src = naiveSrc;
+      src = naiveSrc + "/src";
 
       # https://github.com/klzgrad/naiveproxy/blob/master/src/build.sh#L46
       gnFlags = {
