@@ -1,5 +1,5 @@
-{ fetchFromGitHub
-  # This is in https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/browsers/chromium/default.nix
+# This package is written by @KiruyaMomochi.
+{ src
 , chromium
 , lib
 , stdenv
@@ -10,13 +10,8 @@
 , python3
 }:
 let
-  version = "none";
-  naiveSrc = fetchFromGitHub {
-    repo = "naiveproxy";
-    owner = "klzgrad";
-    rev = "v${version}";
-    sha256 = "sha256-DxkpqL3Yt7my3hDJqyJf3XQNWT8sn3PZ7QsxYSrqyl0=";
-  };
+  version = "";
+  naiveSrc = src;  
   packageName = self.packageName;
   # Make chromium library functions use the correct version
   mkChromiumDerivation = (chromium.override (previous: {
@@ -168,7 +163,7 @@ let
       pname = "naiveproxy";
       packageName = "naiveproxy";
       buildTargets = [ "naive" ];
-      src = naiveSrc + "/src";
+      src = naiveSrc;
 
       # https://github.com/klzgrad/naiveproxy/blob/master/src/build.sh#L46
       gnFlags = {
