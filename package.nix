@@ -10,11 +10,13 @@
 , python3
 }:
 let
-  version = "9999";
+  #use nixpkgs chromium version number in order to keep patch sets in consistency
+  #version = "9999";
   packageName = "naiveproxy";
+  
   # Make chromium library functions use the correct version
   mkChromiumDerivation = (chromium.override (previous: {
-    upstream-info = chromium.upstream-info // { inherit version; };
+    upstream-info = chromium.upstream-info /* // { inherit version; }*/;
   })).mkDerivation;
 
   # Copied from https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/browsers/chromium/common.nix
@@ -158,7 +160,7 @@ let
     # rec for buildTargets
     # `buildFun base` is extraAttrs in common.nix
     (base: rec {
-      inherit version;
+      #inherit version;
       pname = "naiveproxy";
       packageName = "naiveproxy";
       buildTargets = [ "naive" ];
@@ -167,8 +169,14 @@ let
       # https://github.com/klzgrad/naiveproxy/blob/master/src/build.sh#L46
       gnFlags = {
         fatal_linker_warnings = false;
-
+        treat_warnings_as_errors=false;
+        
         enable_base_tracing = false;
+        
+        is_clang = true;
+        #libcxx shipped doesn't work!
+        use_custom_libcxx = false;
+
         use_udev = false;
         use_aura = false;
         use_ozone = false;
@@ -189,13 +197,17 @@ let
       depsBuildBuild = lib.lists.remove libpng (base.depsBuildBuild or [ ]);
       buildInputs = [ openssl ];
 
+      
       ignoredPatches = [
         "widevine-79.patch"
         "angle-wayland-include-protocol.patch"
+        
+        #Have to exclude this, doesn't know why
         "chromium-initial-prefs.patch"
+
         # qr code generator
-        "https://github.com/chromium/chromium/commit/b9bef8e9555645fc91fab705bec697214a39dbc1.patch"
-        "https://github.com/chromium/chromium/commit/fc09363b2278893790d131c72a4ed96ec9837624.patch"
+        #"https://github.com/chromium/chromium/commit/b9bef8e9555645fc91fab705bec697214a39dbc1.patch"
+        #"https://github.com/chromium/chromium/commit/fc09363b2278893790d131c72a4ed96ec9837624.patch"
       ];
       # From common.nix of nixpkgs
       patches = builtins.filter
@@ -206,6 +218,7 @@ let
         )
         base.patches;
       inherit postPatch;
+      
 
       # See common.nix of nixpkgs
       buildPhase =
@@ -229,6 +242,10 @@ let
         libExecPath="${libExecPath}"
         ${python3.pythonOnBuildForHost}/bin/python3 build/linux/unbundle/replace_gn_files.py --system-libraries ${toString gnSystemLibraries}
         ${self.passthru.chromiumDeps.gn}/bin/gn gen --args=${lib.escapeShellArg patchedGnFlags} out/Release | tee gn-gen-outputs.txt
+
+#        ${self.passthru.chromiumDeps.gn}/bin/gn args --list out/Release 
+
+#exit 1
 
         # Fail if `gn gen` contains a WARNING.
         grep -o WARNING gn-gen-outputs.txt && echo "Found gn WARNING, exiting nix build" && exit 1
