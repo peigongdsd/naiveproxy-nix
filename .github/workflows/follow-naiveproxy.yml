@@ -19,6 +19,8 @@ jobs:
         with: 
           token: ${{ secrets.ACTIONS_TOKEN }}
           submodules: 'recursive'
+
+      
       - name: Pull & update submodules recursively
         run: |
           git submodule update --init --recursive
