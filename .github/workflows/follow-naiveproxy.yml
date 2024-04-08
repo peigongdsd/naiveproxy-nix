@@ -5,27 +5,30 @@ name: CI
 on:
   schedule:
     - cron: '0 * * * *'  # Run every hour
+  push:
+    branches: 
+      - master
   
 jobs:
   update_submodule:
     runs-on: ubuntu-latest
     
+
     steps:
-    - name: Checkout main repository
-      uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.CI_TOKEN }}
-        submodules: true
+      - uses: actions/checkout@v3
+        with: 
+          token: ${{ secrets.ACTIONS_TOKEN }}
+          submodules: 'recursive'
+      - name: Pull & update submodules recursively
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
+      - name: Commit
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions - update submodules"
+          git add --all
+          git commit -m "Update submodules" || echo "No changes to commit"
+          git push
 
-    # Update references
-    - name: Git Submodule Update
-      run: |
-        git pull --recurse-submodules
-        git submodule update --remote --recursive
 
-    - name: Commit update
-      run: |
-        git config --global user.name 'Git bot'
-        git config --global user.email 'bot@noreply.github.com'
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-        git commit -am "Auto updated submodule references" && git push || echo "No changes to commit"
